@@ -16,18 +16,66 @@ static P: &'static [u8] = &[
     128, 195, 78, 66, 156, 61, 215, 189,
 ];
 static GRAD3: &'static [Grad] = &[
-    Grad { x: 1.0, y: 1.0 },
-    Grad { x: -1.0, y: 1.0 },
-    Grad { x: 1.0, y: -1.0 },
-    Grad { x: -1.0, y: -1.0 },
-    Grad { x: 1.0, y: 0.0 },
-    Grad { x: -1.0, y: 0.0 },
-    Grad { x: 1.0, y: 0.0 },
-    Grad { x: -1.0, y: 0.0 },
-    Grad { x: 0.0, y: 1.0 },
-    Grad { x: 0.0, y: -1.0 },
-    Grad { x: 0.0, y: 1.0 },
-    Grad { x: 0.0, y: -1.0 },
+    Grad {
+        x: 1.0,
+        y: 1.0,
+        z: 0.0,
+    },
+    Grad {
+        x: -1.0,
+        y: 1.0,
+        z: 0.0,
+    },
+    Grad {
+        x: 1.0,
+        y: -1.0,
+        z: 0.0,
+    },
+    Grad {
+        x: -1.0,
+        y: -1.0,
+        z: 0.0,
+    },
+    Grad {
+        x: 1.0,
+        y: 0.0,
+        z: 1.0,
+    },
+    Grad {
+        x: -1.0,
+        y: 0.0,
+        z: 1.0,
+    },
+    Grad {
+        x: 1.0,
+        y: 0.0,
+        z: -1.0,
+    },
+    Grad {
+        x: -1.0,
+        y: 0.0,
+        z: -1.0,
+    },
+    Grad {
+        x: 0.0,
+        y: 1.0,
+        z: 1.0,
+    },
+    Grad {
+        x: 0.0,
+        y: -1.0,
+        z: 1.0,
+    },
+    Grad {
+        x: 0.0,
+        y: 1.0,
+        z: -1.0,
+    },
+    Grad {
+        x: 0.0,
+        y: -1.0,
+        z: -1.0,
+    },
 ];
 
 #[derive(Debug)]
@@ -90,14 +138,14 @@ impl Perlin {
 
     /// 2D Perlin Noise
     #[allow(non_snake_case)]
-    pub fn perlin2(&self, x: Float, y: Float) -> Float {
+    pub fn perlin2(&self, mut x: Float, mut y: Float) -> Float {
         // Find unit grid cell containing point
         let X = x.floor();
         let Y = y.floor();
 
         // Get relative xy coordinates of point within that cell
-        let x = x - X;
-        let y = y - Y;
+        x -= X;
+        y -= Y;
 
         // Wrap the cells at 255
         let X = X as u64 % 255;
@@ -118,6 +166,71 @@ impl Perlin {
             Self::lerp(n00, n10, u),
             Self::lerp(n01, n11, u),
             Self::fade(y),
+        )
+    }
+
+    /// 3D Perlin Noise
+    #[allow(non_snake_case)]
+    pub fn perlin3(&self, mut x: Float, mut y: Float, mut z: Float) -> Float {
+        // Find unit grid cell containing point
+        let X = x.floor();
+        let Y = y.floor();
+        let Z = z.floor();
+
+        // Get relative xy coordinates of point within that cell
+        x -= X;
+        y -= Y;
+        z -= Z;
+
+        // Wrap the cells at 255
+        let X = X as u64 % 255;
+        let Y = Y as u64 % 255;
+        let Z = Z as u64 % 255;
+
+        // Calculate noise contributions from each of the four corners
+        let n000 = self.grad_p
+            [(X + (self.perm[(Y + (self.perm[Z as usize] as u64)) as usize] as u64)) as usize]
+            .dot3(x, y, z);
+        let n001 = self.grad_p[(X
+            + (self.perm[(Y + (self.perm[(Z + 1) as usize] as u64)) as usize] as u64))
+            as usize]
+            .dot3(x, y, z - 1.0);
+        let n010 = self.grad_p
+            [(X + (self.perm[(Y + 1 + (self.perm[Z as usize] as u64)) as usize] as u64)) as usize]
+            .dot3(x, y - 1.0, z);
+        let n011 = self.grad_p[(X
+            + (self.perm[(Y + 1 + (self.perm[(Z + 1) as usize] as u64)) as usize] as u64))
+            as usize]
+            .dot3(x, y - 1.0, z - 1.0);
+        let n100 = self.grad_p
+            [(X + 1 + (self.perm[(Y + (self.perm[Z as usize] as u64)) as usize] as u64)) as usize]
+            .dot3(x - 1.0, y, z);
+        let n101 = self.grad_p[(X
+            + 1
+            + (self.perm[(Y + (self.perm[(Z + 1) as usize] as u64)) as usize] as u64))
+            as usize]
+            .dot3(x - 1.0, y, z - 1.0);
+        let n110 = self.grad_p[(X
+            + 1
+            + (self.perm[(Y + 1 + (self.perm[Z as usize] as u64)) as usize] as u64))
+            as usize]
+            .dot3(x - 1.0, y - 1.0, z);
+        let n111 = self.grad_p[(X
+            + 1
+            + (self.perm[(Y + 1 + (self.perm[(Z + 1) as usize] as u64)) as usize] as u64))
+            as usize]
+            .dot3(x - 1.0, y - 1.0, z - 1.0);
+
+        // Compute the fade curve value for x
+        let u = Self::fade(x);
+        let v = Self::fade(y);
+        let w = Self::fade(z);
+
+        // Interpolate the four results
+        Self::lerp(
+            Self::lerp(Self::lerp(n000, n100, u), Self::lerp(n001, n101, u), w),
+            Self::lerp(Self::lerp(n010, n110, u), Self::lerp(n011, n111, u), w),
+            v,
         )
     }
 }
