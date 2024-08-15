@@ -1,4 +1,4 @@
-use crate::types::Float;
+use crate::{grad::Grad, types::Float};
 
 static P: &'static [u8] = &[
     217, 13, 137, 91, 90, 15, 131, 160, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
@@ -16,84 +16,19 @@ static P: &'static [u8] = &[
     128, 195, 78, 66, 156, 61, 215, 189,
 ];
 static GRAD3: &'static [Grad] = &[
-    Grad {
-        x: 1.0,
-        y: 1.0,
-        z: 0.0,
-    },
-    Grad {
-        x: -1.0,
-        y: 1.0,
-        z: 0.0,
-    },
-    Grad {
-        x: 1.0,
-        y: -1.0,
-        z: 0.0,
-    },
-    Grad {
-        x: -1.0,
-        y: -1.0,
-        z: 0.0,
-    },
-    Grad {
-        x: 1.0,
-        y: 0.0,
-        z: 1.0,
-    },
-    Grad {
-        x: -1.0,
-        y: 0.0,
-        z: 1.0,
-    },
-    Grad {
-        x: 1.0,
-        y: 0.0,
-        z: -1.0,
-    },
-    Grad {
-        x: -1.0,
-        y: 0.0,
-        z: -1.0,
-    },
-    Grad {
-        x: 0.0,
-        y: 1.0,
-        z: 1.0,
-    },
-    Grad {
-        x: 0.0,
-        y: -1.0,
-        z: 1.0,
-    },
-    Grad {
-        x: 0.0,
-        y: 1.0,
-        z: -1.0,
-    },
-    Grad {
-        x: 0.0,
-        y: -1.0,
-        z: -1.0,
-    },
+    Grad { x: 1.0, y: 1.0 },
+    Grad { x: -1.0, y: 1.0 },
+    Grad { x: 1.0, y: -1.0 },
+    Grad { x: -1.0, y: -1.0 },
+    Grad { x: 1.0, y: 0.0 },
+    Grad { x: -1.0, y: 0.0 },
+    Grad { x: 1.0, y: 0.0 },
+    Grad { x: -1.0, y: 0.0 },
+    Grad { x: 0.0, y: 1.0 },
+    Grad { x: 0.0, y: -1.0 },
+    Grad { x: 0.0, y: 1.0 },
+    Grad { x: 0.0, y: -1.0 },
 ];
-
-#[derive(Clone, Copy, Debug)]
-pub struct Grad {
-    x: Float,
-    y: Float,
-    z: Float,
-}
-
-impl Default for Grad {
-    fn default() -> Self {
-        Grad {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        }
-    }
-}
 
 #[derive(Debug)]
 pub struct Perlin {
@@ -105,10 +40,6 @@ impl Perlin {
     pub fn new(seed: Float) -> Self {
         let (perm, grad_p) = Self::calc_from_seed(seed);
         Self { perm, grad_p }
-    }
-
-    pub fn set_seed(&mut self, seed: Float) {
-        (self.perm, self.grad_p) = Self::calc_from_seed(seed);
     }
 
     /// The original author said it isn't a very good seeding function,
@@ -147,6 +78,48 @@ impl Perlin {
 
         (perm, grad_p)
     }
+
+    // I'd make this func generic, but there's no a pow built-in trait for this kinda moment
+    fn fade(t: Float) -> Float {
+        t.powi(3) * (t * (t * 6.0 - 15.0) + 10.0)
+    }
+
+    fn lerp(a: Float, b: Float, t: Float) -> Float {
+        (1.0 - t) * a + t * b
+    }
+
+    /// 2D Perlin Noise
+    #[allow(non_snake_case)]
+    pub fn perlin2(&self, x: Float, y: Float) -> Float {
+        // Find unit grid cell containing point
+        let X = x.floor();
+        let Y = y.floor();
+
+        // Get relative xy coordinates of point within that cell
+        let x = x - X;
+        let y = y - Y;
+
+        // Wrap the cells at 255
+        let X = X as u64 % 255;
+        let Y = Y as u64 % 255;
+
+        // Calculate noise contributions from each of the four corners
+        let n00 = self.grad_p[(X + (self.perm[Y as usize] as u64)) as usize].dot2(x, y);
+        let n01 = self.grad_p[(X + (self.perm[(Y + 1) as usize] as u64)) as usize].dot2(x, y - 1.0);
+        let n10 = self.grad_p[(X + 1 + (self.perm[Y as usize] as u64)) as usize].dot2(x - 1.0, y);
+        let n11 = self.grad_p[(X + 1 + (self.perm[(Y + 1) as usize] as u64)) as usize]
+            .dot2(x - 1.0, y - 1.0);
+
+        // Compute the fade curve value for x
+        let u = Self::fade(x);
+
+        // Interpolate the four results
+        Self::lerp(
+            Self::lerp(n00, n10, u),
+            Self::lerp(n01, n11, u),
+            Self::fade(y),
+        )
+    }
 }
 
 impl Default for Perlin {
@@ -154,17 +127,3 @@ impl Default for Perlin {
         Self::new(Float::default())
     }
 }
-
-// pub fn perlin(x: Float, y: Float) {
-//     // Find unit grid cell containing point
-//     let X = x.floor();
-//     let Y = y.floor();
-
-//     // Get relative xy coordinates of point within that cell
-//     let x = x - X;
-//     let y = y - Y;
-
-//     // Wrap the cells at 255
-//     let X = X as u64 % 255;
-//     let Y = Y as u64 % 255;
-// }
