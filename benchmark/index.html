@@ -1,18 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Benchmark</title>
-</head>
-<body>
-  <script type="module">
-    import init, { Perlin } from "./wasm-perlin-pkg/wasm_perlin.js";
-    await init()
+<title>Perlin noise</title>
+<style>
+.centerbox {
+  /* flexbox, por favor */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
 
-    const seed = Math.random()
-    const noise = new Perlin(seed)
-    console.log(noise.perlin3(14.34, 34.23, 343.23))
-  </script>
-</body>
-</html>
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-pack: center;
+  -moz-box-align: center;
+
+  width: 100%;
+  height: 100%;
+  margin: 0; padding: 0;
+}
+body, html { width: 100%; height: 100%; padding: 0; margin: 0; }
+canvas {
+  /* border-radius: 30px;  Border radiuses don't seem to work with putImageData */
+  box-shadow: 0 0 10px #777;
+  width: 1024px;
+  height: 768px;
+}
+body {
+  background-color: #eee;
+}
+</style>
+<div class='centerbox'>
+  <canvas id='perlinjs'></canvas>
+  <canvas id='webperlin'></canvas>
+</div>
+
+<!-- perlin.js -->
+<script src='perlin.js'></script>
+<script>
+  const canvasPerlinjs = document.getElementById('perlinjs')
+  canvasPerlinjs.width = 1024;
+  canvasPerlinjs.height = 768;
+
+  let ctx = canvasPerlinjs.getContext('2d');
+
+  let image = ctx.createImageData(canvasPerlinjs.width, canvasPerlinjs.height);
+  let data = image.data;
+
+  const seed = Math.random()
+  noise.seed(seed)
+
+  let start = Date.now();
+
+  for (let x = 0; x < canvasPerlinjs.width; x++) {
+    for (let y = 0; y < canvasPerlinjs.height; y++) {
+      const value = Math.abs(noise.perlin2(x / 100, y / 100)) * 256;
+
+      const cell = (x + y * canvasPerlinjs.width) * 4;
+      data[cell] = data[cell + 1] = data[cell + 2] = value;
+      data[cell] += Math.max(0, (25 - value) * 8);
+      data[cell + 3] = 255; // alpha.
+    }
+  }
+
+  let end = Date.now();
+
+  ctx.fillColor = 'black';
+  ctx.fillRect(0, 0, 100, 100);
+  ctx.putImageData(image, 0, 0);
+
+  ctx.font = '16px sans-serif'
+  ctx.textAlign = 'center';
+  ctx.fillText('Rendered in ' + (end - start) + ' ms', canvasPerlinjs.width / 2, canvasPerlinjs.height - 20);
+
+  if(console) {
+    console.log('[perlin.js] Rendered in ' + (end - start) + ' ms');
+  }
+</script>
+
+<!-- wasm-perlin -->
+<script type="module">
+  import init, { Perlin } from "./wasm-perlin-pkg/wasm_perlin.js";
+  await init()
+
+  const noiseWasm = new Perlin(seed)
+  const canvasWasmPerlin = document.getElementById('webperlin')
+  canvasWasmPerlin.width = 1024;
+  canvasWasmPerlin.height = 768;
+
+  ctx = canvasWasmPerlin.getContext('2d');
+
+  image = ctx.createImageData(canvasWasmPerlin.width, canvasWasmPerlin.height);
+  data = image.data;
+
+  start = Date.now();
+
+  for (let x = 0; x < canvasWasmPerlin.width; x++) {
+    for (let y = 0; y < canvasWasmPerlin.height; y++) {
+      const value = Math.abs(noiseWasm.perlin2(x / 100, y / 100)) * 256;
+
+      const cell = (x + y * canvasWasmPerlin.width) * 4;
+      data[cell] = data[cell + 1] = data[cell + 2] = value;
+      data[cell] += Math.max(0, (25 - value) * 8);
+      data[cell + 3] = 255; // alpha.
+    }
+  }
+
+  end = Date.now();
+
+  ctx.fillColor = 'black';
+  ctx.fillRect(0, 0, 100, 100);
+  ctx.putImageData(image, 0, 0);
+
+  ctx.font = '16px sans-serif'
+  ctx.textAlign = 'center';
+  ctx.fillText('Rendered in ' + (end - start) + ' ms', canvasWasmPerlin.width / 2, canvasWasmPerlin.height - 20);
+
+  if(console) {
+    console.log('[wasm-perlin] Rendered in ' + (end - start) + ' ms');
+  }
+</script>
