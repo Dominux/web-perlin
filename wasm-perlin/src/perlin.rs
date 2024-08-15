@@ -1,3 +1,5 @@
+use wasm_bindgen::prelude::*;
+
 use crate::{grad::Grad, types::Float};
 
 static P: &'static [u8] = &[
@@ -78,16 +80,24 @@ static GRAD3: &'static [Grad] = &[
     },
 ];
 
+#[wasm_bindgen]
 #[derive(Debug)]
 pub struct Perlin {
     perm: [u8; 512],
     grad_p: [Grad; 512],
 }
 
+#[wasm_bindgen]
 impl Perlin {
+    #[wasm_bindgen(constructor)]
     pub fn new(seed: Float) -> Self {
         let (perm, grad_p) = Self::calc_from_seed(seed);
         Self { perm, grad_p }
+    }
+
+    /// Set a new seed value
+    pub fn set_seed(&mut self, seed: Float) {
+        (self.perm, self.grad_p) = Self::calc_from_seed(seed);
     }
 
     /// The original author said it isn't a very good seeding function,

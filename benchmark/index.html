@@ -6,6 +6,12 @@
   <title>Benchmark</title>
 </head>
 <body>
-  
+  <script type="module">
+    import init, { Perlin } from "./wasm-perlin-pkg/wasm_perlin.js";
+    await init()
+
+    const noise = new Perlin(69)
+    console.log(noise.perlin3(14.34, 34.23, 343.23))
+  </script>
 </body>
 </html>
