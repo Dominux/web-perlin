@@ -196,6 +196,34 @@ impl Perlin {
         )
     }
 
+    /// 3D Perlin Noise Matrix
+    #[wasm_bindgen(js_name = "perlin3Matrix")]
+    pub fn perlin3_matrix(&self, x: Float, y: Float, z: Float, scale: Float) -> js_sys::Array {
+        js_sys::Array::from(&JsValue::from(
+            (0..(z as usize))
+                .map(|z| {
+                    js_sys::Array::from(&JsValue::from(
+                        (0..(x as usize))
+                            .map(|x| {
+                                JsValue::from(js_sys::Float64Array::from(
+                                    &(0..(y as usize))
+                                        .map(|y| {
+                                            self.perlin3(
+                                                (x as Float) / scale,
+                                                (y as Float) / scale,
+                                                (z as Float) / scale,
+                                            )
+                                        })
+                                        .collect::<Vec<_>>()[..],
+                                ))
+                            })
+                            .collect::<Vec<_>>(),
+                    ))
+                })
+                .collect::<Vec<_>>(),
+        ))
+    }
+
     /// 3D Perlin Noise
     #[allow(non_snake_case)]
     pub fn perlin3(&self, mut x: Float, mut y: Float, mut z: Float) -> Float {

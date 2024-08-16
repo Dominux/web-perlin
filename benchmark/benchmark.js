@@ -6,6 +6,8 @@ const seed = Math.random()
 noise.seed(seed)
 const noiseWasm = new Perlin(seed)
 
+// console.log(noiseWasm.perlin3Matrix(100, 100, 100, 10))
+
 const JsNoise = (x, y, scale) =>
   [...Array(x).keys()].map((x) =>
     [...Array(y).keys()].map((y) => noise.perlin2(x / scale, y / scale))
