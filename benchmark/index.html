@@ -35,86 +35,56 @@ body {
 
 <!-- perlin.js -->
 <script src='perlin.js'></script>
-<script>
-  const canvasPerlinjs = document.getElementById('perlinjs')
-  canvasPerlinjs.width = 1024;
-  canvasPerlinjs.height = 768;
-
-  let ctx = canvasPerlinjs.getContext('2d');
-
-  let image = ctx.createImageData(canvasPerlinjs.width, canvasPerlinjs.height);
-  let data = image.data;
-
-  const seed = Math.random()
-  noise.seed(seed)
-
-  let start = Date.now();
-
-  for (let x = 0; x < canvasPerlinjs.width; x++) {
-    for (let y = 0; y < canvasPerlinjs.height; y++) {
-      const value = Math.abs(noise.perlin2(x / 100, y / 100)) * 256;
-
-      const cell = (x + y * canvasPerlinjs.width) * 4;
-      data[cell] = data[cell + 1] = data[cell + 2] = value;
-      data[cell] += Math.max(0, (25 - value) * 8);
-      data[cell + 3] = 255; // alpha.
-    }
-  }
-
-  let end = Date.now();
-
-  ctx.fillColor = 'black';
-  ctx.fillRect(0, 0, 100, 100);
-  ctx.putImageData(image, 0, 0);
-
-  ctx.font = '16px sans-serif'
-  ctx.textAlign = 'center';
-  ctx.fillText('Rendered in ' + (end - start) + ' ms', canvasPerlinjs.width / 2, canvasPerlinjs.height - 20);
-
-  if(console) {
-    console.log('[perlin.js] Rendered in ' + (end - start) + ' ms');
-  }
-</script>
 
 <!-- wasm-perlin -->
 <script type="module">
   import init, { Perlin } from "./wasm-perlin-pkg/wasm_perlin.js";
   await init()
 
+  const seed = Math.random()
+
+  noise.seed(seed)
   const noiseWasm = new Perlin(seed)
-  const canvasWasmPerlin = document.getElementById('webperlin')
-  canvasWasmPerlin.width = 1024;
-  canvasWasmPerlin.height = 768;
 
-  ctx = canvasWasmPerlin.getContext('2d');
+  const experiments = [
+    ['perlinjs', noise],
+    ['webperlin', noiseWasm]
+  ]
+  experiments.forEach(([id, noise]) => {
+    const canvas = document.getElementById(id)
+    canvas.width = 1024;
+    canvas.height = 768;
 
-  image = ctx.createImageData(canvasWasmPerlin.width, canvasWasmPerlin.height);
-  data = image.data;
+    const ctx = canvas.getContext('2d');
 
-  start = Date.now();
+    const image = ctx.createImageData(canvas.width, canvas.height);
+    const data = image.data;
 
-  for (let x = 0; x < canvasWasmPerlin.width; x++) {
-    for (let y = 0; y < canvasWasmPerlin.height; y++) {
-      const value = Math.abs(noiseWasm.perlin2(x / 100, y / 100)) * 256;
+    const totalStart = Date.now();
 
-      const cell = (x + y * canvasWasmPerlin.width) * 4;
-      data[cell] = data[cell + 1] = data[cell + 2] = value;
-      data[cell] += Math.max(0, (25 - value) * 8);
-      data[cell + 3] = 255; // alpha.
+    for (let x = 0; x < canvas.width; x++) {
+      for (let y = 0; y < canvas.height; y++) {
+        const value = Math.abs(noise.perlin2(x / 10, y / 10)) * 256;
+
+        const cell = (x + y * canvas.width) * 4;
+        data[cell] = data[cell + 1] = data[cell + 2] = value;
+        data[cell] += Math.max(0, (25 - value) * 8);
+        data[cell + 3] = 255; // alpha.
+      }
     }
-  }
 
-  end = Date.now();
+    const totalEnd = Date.now();
 
-  ctx.fillColor = 'black';
-  ctx.fillRect(0, 0, 100, 100);
-  ctx.putImageData(image, 0, 0);
+    ctx.fillColor = 'black';
+    ctx.fillRect(0, 0, 100, 100);
+    ctx.putImageData(image, 0, 0);
 
-  ctx.font = '16px sans-serif'
-  ctx.textAlign = 'center';
-  ctx.fillText('Rendered in ' + (end - start) + ' ms', canvasWasmPerlin.width / 2, canvasWasmPerlin.height - 20);
+    ctx.font = '16px sans-serif'
+    ctx.textAlign = 'center';
+    ctx.fillText('Rendered in ' + (totalEnd - totalStart) + ' ms', canvas.width / 2, canvas.height - 20);
 
-  if(console) {
-    console.log('[wasm-perlin] Rendered in ' + (end - start) + ' ms');
-  }
+    if(console) {
+      console.log(`[${id}] Rendered in ` + (totalEnd - totalStart) + ' ms');
+    }
+  })
 </script>
