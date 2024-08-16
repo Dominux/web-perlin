@@ -1,0 +1,15 @@
+{
+  "name": "wasm-perlin",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "wasm_perlin_bg.wasm",
+    "wasm_perlin.js",
+    "wasm_perlin.d.ts"
+  ],
+  "main": "wasm_perlin.js",
+  "types": "wasm_perlin.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
