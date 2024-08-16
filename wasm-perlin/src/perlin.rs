@@ -96,6 +96,7 @@ impl Perlin {
     }
 
     /// Set a new seed value
+    #[wasm_bindgen(js_name = "setSeed")]
     pub fn set_seed(&mut self, seed: Float) {
         (self.perm, self.grad_p) = Self::calc_from_seed(seed);
     }
@@ -144,6 +145,22 @@ impl Perlin {
 
     fn lerp(a: Float, b: Float, t: Float) -> Float {
         (1.0 - t) * a + t * b
+    }
+
+    /// 2D Perlin Noise Matrix
+    #[wasm_bindgen(js_name = "perlin2Matrix")]
+    pub fn perlin2_matrix(&self, x: Float, y: Float, scale: Float) -> js_sys::Array {
+        js_sys::Array::from(&JsValue::from(
+            (0..(x as usize))
+                .map(|x| {
+                    JsValue::from(js_sys::Float64Array::from(
+                        &(0..(y as usize))
+                            .map(|y| self.perlin2((x as Float) / scale, (y as Float) / scale))
+                            .collect::<Vec<_>>()[..],
+                    ))
+                })
+                .collect::<Vec<_>>(),
+        ))
     }
 
     /// 2D Perlin Noise

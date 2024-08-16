@@ -1,40 +1,38 @@
 <!DOCTYPE html>
-<title>Perlin noise</title>
-<style>
-.centerbox {
-  /* flexbox, por favor */
-  display: -webkit-box;
-  -webkit-box-orient: horizontal;
-  -webkit-box-pack: center;
-  -webkit-box-align: center;
+<html lang="en">
 
-  display: -moz-box;
-  -moz-box-orient: horizontal;
-  -moz-box-pack: center;
-  -moz-box-align: center;
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perlin noise</title>
+    <style>
+      /* body, html { 
+        width: 100%; 
+        height: 100%
+      }
+       */
 
-  width: 100%;
-  height: 100%;
-  margin: 0; padding: 0;
-}
-body, html { width: 100%; height: 100%; padding: 0; margin: 0; }
-canvas {
-  /* border-radius: 30px;  Border radiuses don't seem to work with putImageData */
-  box-shadow: 0 0 10px #777;
-  width: 1024px;
-  height: 768px;
-}
-body {
-  background-color: #eee;
-}
-</style>
-<div class='centerbox'>
-  <canvas id='perlinjs'></canvas>
-  <canvas id='webperlin'></canvas>
-</div>
+      canvas {
+        display: block;
+        margin: 1rem auto;
+        box-shadow: 0 0 10px #777;
+        width: 1024px;
+        height: 768px;
+      }
+    </style>
+  </head>
 
-<!-- perlin.js -->
-<script src='./perlin.js'></script>
+  <body>
+    <div>
+      <canvas id='perlinjs'></canvas>
+      <canvas id='webperlin'></canvas>  
+    </div>
+    
+    <!-- perlin.js -->
+    <script src='./perlin.js'></script>
+    
+    <!-- wasm-perlin -->
+    <script src="./benchmark.js" type="module"></script>
+  </body>
 
-<!-- wasm-perlin -->
-<script src="./benchmark.js" type="module"></script>
+</html>
