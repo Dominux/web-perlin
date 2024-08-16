@@ -6,12 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perlin noise</title>
     <style>
+      .perlin-type {
+        display: inline-flex;
+        width: 100%;
+        justify-content: space-evenly;
+      }
+
       canvas {
-        display: block;
-        margin: 1rem auto;
         box-shadow: 0 0 10px #777;
-        width: 1024px;
-        height: 768px;
+        width: 40%;
+        aspect-ratio: 1024 / 768;
       }
     </style>
   </head>
@@ -20,12 +24,17 @@
     <div>
       <h2>Perlin 2D</h2>
 
-      <canvas id='perlinjs2'></canvas>
-      <canvas id='wasmperlin2'></canvas>
+      <div class="perlin-type">
+        <canvas id='perlinjs2'></canvas>
+        <canvas id='wasmperlin2'></canvas>
+      </div>
 
       <h2>Perlin 3D</h2>
-      <canvas id='perlinjs3'></canvas>
-      <canvas id='wasmperlin3'></canvas>  
+
+      <div class="perlin-type">
+        <canvas id='perlinjs3'></canvas>
+        <canvas id='wasmperlin3'></canvas>
+      </div>
     </div>
     
     <!-- perlin.js -->

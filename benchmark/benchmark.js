@@ -2,7 +2,7 @@ import init, { Perlin } from './wasm-perlin-pkg/wasm_perlin.js'
 await init()
 
 const seed = Math.random()
-const scale = 50
+const scale = 42
 
 noise.seed(seed)
 const noiseWasm = new Perlin(seed)
@@ -48,6 +48,8 @@ const perlin2Experiment = () => {
     }
 
     ctx.putImageData(image, 0, 0)
+
+    setTimeout(0)
   }
 }
 
@@ -96,18 +98,20 @@ const perlin3Experiment = () => {
 
         const cell = (x + y * canvas.width) * 4
 
-        data[cell] = getAverage(zs.slice(0, 40))
-        data[cell + 1] = getAverage(zs.slice(40, 80))
-        data[cell + 2] = getAverage(zs.slice(80, zMax))
+        data[cell] = getAverage(zs.slice(0, zMax / 3))
+        data[cell + 1] = getAverage(zs.slice(zMax / 3, (zMax / 3) * 2))
+        data[cell + 2] = getAverage(zs.slice((zMax / 3) * 2, zMax))
         data[cell + 3] = 255 // alpha.
       }
     }
 
     ctx.putImageData(image, 0, 0)
+
+    setTimeout(0)
   }
 }
 
 const getAverage = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length
 
-// perlin2Experiment()
-// perlin3Experiment()
+perlin2Experiment()
+perlin3Experiment()
