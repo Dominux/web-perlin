@@ -73,14 +73,14 @@ const perlin3Experiment = () => {
 
   for (const [id, noiseFunc] of experiments) {
     const canvas = document.getElementById(id)
-    canvas.width = 1024
-    canvas.height = 768
+    canvas.width = 1024 / 5
+    canvas.height = 768 / 5
 
-    const zMax = 120
+    const zMax = 60
 
     const startTime = Date.now()
 
-    const result = noiseFunc(canvas.width, canvas.height, zMax, scale)
+    const result = noiseFunc(canvas.width, canvas.height, zMax, scale / 4)
 
     const endTime = Date.now()
 

@@ -1,47 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perlin noise</title>
-    <style>
-      .perlin-type {
-        display: inline-flex;
-        width: 100%;
-        justify-content: space-evenly;
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perlin noise</title>
+  <style>
+    .perlin-type {
+      display: inline-flex;
+      width: 100%;
+      justify-content: space-evenly;
+    }
 
-      canvas {
-        box-shadow: 0 0 10px #777;
-        width: 40%;
-        aspect-ratio: 1024 / 768;
-      }
-    </style>
-  </head>
+    canvas {
+      box-shadow: 0 0 10px #777;
+      width: 40%;
+      aspect-ratio: 1024 / 768;
+    }
+  </style>
+</head>
 
-  <body>
-    <div>
-      <h2>Perlin 2D</h2>
+<body>
+  <div>
+    <h2>Perlin 2D</h2>
 
-      <div class="perlin-type">
-        <canvas id='perlinjs2'></canvas>
-        <canvas id='wasmperlin2'></canvas>
-      </div>
-
-      <h2>Perlin 3D</h2>
-
-      <div class="perlin-type">
-        <canvas id='perlinjs3'></canvas>
-        <canvas id='wasmperlin3'></canvas>
-      </div>
+    <div class="perlin-type">
+      <h2>JS</h2>
+      <h2>Wasm</h2>
     </div>
-    
-    <!-- perlin.js -->
-    <script src='./perlin.js'></script>
-    
-    <!-- wasm-perlin -->
-    <script src="./benchmark.js" type="module"></script>
-  </body>
+    <div class="perlin-type">
+      <canvas id='perlinjs2'></canvas>
+      <canvas id='wasmperlin2'></canvas>
+    </div>
+
+    <h2>Perlin 3D</h2>
+
+    <div class="perlin-type">
+      <h2>JS</h2>
+      <h2>Wasm</h2>
+    </div>
+    <div class="perlin-type">
+      <canvas id='perlinjs3'></canvas>
+      <canvas id='wasmperlin3'></canvas>
+    </div>
+  </div>
+
+  <!-- perlin.js -->
+  <script src='./perlin.js'></script>
+
+  <!-- wasm-perlin -->
+  <script src="./benchmark.js" type="module"></script>
+</body>
 
 </html>
